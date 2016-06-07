@@ -27,6 +27,12 @@ enum investment {
     high = 6000
 };
 
+//RANDOM DICE
+mt19937 random_generator(4585965885986);
+uniform_real_distribution<float> real_distribution(0,1);
+
+auto real_rand = bind(real_distribution, random_generator);
+
 class Enterprise {
     private:
         investment marketResearch;  //add chance
@@ -75,6 +81,12 @@ class Enterprise {
             return cost;
         };
 
+        bool dcmp(float x, float y, float precision) {
+            if (x == y) return true;
+            if (fabs(x-y) <= precision) return true;
+            return false;
+        }
+
         long mapRange(long x, long in_min, long in_max, long out_min, long out_max) {
               return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
@@ -97,15 +109,20 @@ class Enterprise {
             aux += investmentReturn(propaganda);
             aux += investmentReturn(training);
 
+            //Adjust by demand and offer
             float distance = distanceTwoPoints(equX, equY, stock, productPrice);
+            float value = mapRange(distance, 0, 2000, 45, 0); //verificar limites 0-2000
 
+            aux += value/100;
+
+            return aux;
         }
 
         float calculateProfit() {
             int grossProfit = 0;
-            for (int i=0; i<stock; i++) {
-                            
-            }
+            float sellChance = calculatePorcentual();
+            for (int i=0; i<stock; i++) 
+                if (real_rand() <= sellChance) grossProfit += productPrice;
             
             return grossProfit - calculateCost();
         };
@@ -121,7 +138,7 @@ class Enterprise {
                     numberOfEmployees < MAX_FUNC_LARGE) numberOfEmployees++;
         };
 
-        void buyStock() {};
+        void setStock() {};
         
 }
 
