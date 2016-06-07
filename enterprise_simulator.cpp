@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <math.h>
+#include <functional>
 
 #define WATER_COST 50
 #define ENERGY_COST 80
@@ -23,7 +24,7 @@ enum building {
 enum investment {
     none = 0,
     low = 1500,
-    medium = 3000,
+    normal = 3000,
     high = 6000
 };
 
@@ -59,8 +60,9 @@ class Enterprise {
                       typeOfBuilding(size),
                       numberOfEmployees(initialEmployees),
                       productPrice(initialPrice),
-                      Stock(initialStock),
-                      cash(initialCash);
+                      stock(initialStock),
+                      cash(initialCash)
+                {};
 
         float calculateCost() {
             float cost = 0.0f;
@@ -81,12 +83,6 @@ class Enterprise {
             return cost;
         };
 
-        bool dcmp(float x, float y, float precision) {
-            if (x == y) return true;
-            if (fabs(x-y) <= precision) return true;
-            return false;
-        }
-
         long mapRange(long x, long in_min, long in_max, long out_min, long out_max) {
               return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
@@ -98,7 +94,7 @@ class Enterprise {
         float investmentReturn(investment INV) {
             if (INV == none) return 0.0f;
             if (INV == low) return 0.05f;
-            if (INV == medium) return 0.1f;
+            if (INV == normal) return 0.1f;
             if (INV == high) return 0.15f;
         }
 
@@ -111,19 +107,19 @@ class Enterprise {
 
             //Adjust by demand and offer
             float distance = distanceTwoPoints(equX, equY, stock, productPrice);
-            float value = mapRange(distance, 0, 2000, 45, 0); //verificar limites 0-2000
+            float value = mapRange(distance, 0, 500, 45, 0); //verificar limites 0-2000
 
             aux += value/100;
 
             return aux;
         }
 
-        float calculateProfit() {
+        float calculateProfit(int equX, float equY) {
             int grossProfit = 0;
-            float sellChance = calculatePorcentual();
+            float sellChance = calculatePorcentual(equX, equY);
             for (int i=0; i<stock; i++) 
-                if (real_rand() <= sellChance) grossProfit += productPrice;
-            
+                if (real_rand() >= sellChance) grossProfit += productPrice;
+
             return grossProfit - calculateCost();
         };
 
@@ -138,11 +134,23 @@ class Enterprise {
                     numberOfEmployees < MAX_FUNC_LARGE) numberOfEmployees++;
         };
 
-        void setStock() {};
-        
-}
+        //Jogadas Possíveis
+        //Passivas
+        void getStock() {};
+        void getPrice() {};
 
-class Node {
-    private:
+        //Ativas
+         
+};
 
+class Node {};
+
+int main() {
+    Enterprise CACCOM(building::small, 5, 100, 250, 2000);
+
+    for (int i=0; i<100; i++)
+        cout << real_rand() << " ";
+    cout << endl << CACCOM.calculatePorcentual(113, 318.153) << endl;
+    cout << CACCOM.calculateCost() << endl;
+    cout << CACCOM.calculateProfit(113, 318.153) << endl;
 }
