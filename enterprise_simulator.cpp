@@ -123,6 +123,13 @@ class Enterprise {
             return grossProfit - calculateCost();
         };
 
+        //Jogadas Possíveis
+        //Passivas
+        void getStock() {};
+        void getPrice() {};
+
+        //Ativas
+ 
         void addEmployee() {
             if (typeOfBuilding == building::small &&
                     numberOfEmployees < MAX_FUNC_SMALL) numberOfEmployees++;
@@ -134,13 +141,7 @@ class Enterprise {
                     numberOfEmployees < MAX_FUNC_LARGE) numberOfEmployees++;
         };
 
-        //Jogadas Possíveis
-        //Passivas
-        void getStock() {};
-        void getPrice() {};
-
-        //Ativas
-         
+        
 };
 
 class Node {};
