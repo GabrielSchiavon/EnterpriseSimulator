@@ -39,4 +39,8 @@ Thumbs.db
 # Compiled Codes #
 ##################
 *.out
+
+# VIM AND GEDIT #
+#################
 *~
+*.swp
