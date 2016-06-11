@@ -2,6 +2,8 @@
 #include <random>
 #include <math.h>
 #include <functional>
+#include <algorithm>
+#include <utility>
 
 #define WATER_COST 50
 #define ENERGY_COST 80
@@ -16,6 +18,15 @@
 #define MAX_STOCK_LARGE 500
 
 #define BASE_SELL_PORC .1
+
+#define ALPHA .75
+#define BETA .60
+#define LAMBDA 2.10
+
+#define A -250
+#define B 1500
+#define C 45
+#define D 105
 
 using namespace std;
 
@@ -201,18 +212,27 @@ class Node {
 
         //Criar heuristica
         float calculateHeuristic(Enterprise turnPlayer) {
-            return 0.0f;
+            return 100.0f*real_rand();
         };
         
-        float calculateEstimateCost(int turnPlayerID) {
-            int totalHeuristicEstimate = 0;
-            for (int i=0; i < players.size(); i++) 
-                if (turnPlayerID == i) totalHeuristicEstimate += calculateHeuristic(players[i]);
+        float calculateEstimateCost() {
+            float totalHeuristicEstimate = 0;
+            int playerTurn = verifyPlayerTurn();
+            for (int i=0; i < players.size(); i++) { 
+                if (playerTurn == i) totalHeuristicEstimate += calculateHeuristic(players[i]);
                 else totalHeuristicEstimate -= calculateHeuristic(players[i]);
+            }
             return totalHeuristicEstimate;
         };
 
 };
+
+pair<int, float> findIntersection() {
+    int x = (D - A)/(A - C);
+    int y = A*x -B;
+
+    return make_pair(x,y);
+}
 
 Node createRawPlay(Node * node) {
     Node newNode(node->getHeight() + 1, node);
@@ -242,7 +262,6 @@ void addTraining(investment inv, Node * node, Node rawNode) {
         node->addPossiblePlay(rawNode);
     }
 }
-
 
 void populatePossiblePlays(Node * node) {
     Node rawNode = createRawPlay(node);
@@ -283,8 +302,43 @@ void populatePossiblePlays(Node * node) {
     }
 }
 
+//Testing
+float search(int depth, Node * node) {
+    float value = 0; 
+    if (0 == depth) return node->calculateEstimateCost();
+    if (node->getPossiblePlays().empty()) populatePossiblePlays(node);
+    for (auto play : node->getPossiblePlays()) { 
+        value += search(depth-1, &play) + node->calculateEstimateCost();
+        //cout << value << endl;
+    }
+
+    return value;
+}
+
+float prospectAnalysis(float value) {
+    if (value >= 0) return pow(value, ALPHA);
+    else return -LAMBDA*pow((-value), BETA);
+}
+
+int analysis(int depth, Node * root) {
+    vector<float> values;
+
+    if (root->getPossiblePlays().empty()) populatePossiblePlays(root);
+    for (auto play : root->getPossiblePlays()) {
+        values.push_back(
+                prospectAnalysis(
+                    search(depth-1, &play)));
+    }
+
+    for (auto value : values) cout << value << endl;
+
+    return distance(values.begin(), 
+            max_element(values.begin(), values.end()) );
+}
+
 int main() {
     Enterprise CACCOM(building::small, 5, 100, 250, 2000);
+    Enterprise CAINFO(building::medium, 5, 100, 250, 3000);
 
     cout << endl << CACCOM.calculatePorcentual(113, 318.153) << endl;
     cout << CACCOM.calculateCost() << endl;
@@ -301,7 +355,12 @@ int main() {
 
     Node node(0, NULL);
     node.addPlayer(CACCOM);
+    node.addPlayer(CAINFO);
 
     populatePossiblePlays(&node);
-    cout << node.getPossiblePlays().size() << endl;
+
+    cout << "Estimate: " << node.calculateEstimateCost() << endl;
+    cout << endl << node.getPossiblePlays().size() << endl;
+    cout << endl << analysis(2, &node) << endl;
+
 }
