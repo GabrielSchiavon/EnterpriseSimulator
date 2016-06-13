@@ -228,7 +228,7 @@ class Node {
 
         //Criar heuristica
         float calculateHeuristic(Enterprise turnPlayer) {
-            return 100.0f*real_rand();
+            return turnPlayer.calculateProfit(0,0);
         };
         
         float calculateEstimateCost() {
